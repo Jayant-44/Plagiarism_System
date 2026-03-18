@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagiarismGuard | AI Intelligence</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="cyber-grid"></div>
+
+    <nav class="floating-nav">
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved"></i> PLAG<strong>GUARD</strong>
+        </div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Scan</a></li>
+            <li><a href="{{ url_for('history') }}">History</a></li>
+            <li><a href="#features">Engine</a></li>
+        </ul>
+
+        {% if session.get('email') %}
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <span style="color: var(--primary); font-size: 0.9rem; font-weight: 600;">
+                    <i class="fa-solid fa-user-astronaut"></i> 
+                    {{ session.get('name', 'Student') }}
+                </span>
+                <a href="{{ url_for('logout') }}" class="btn-account" style="text-decoration:none; border-color: #ef4444; color: #ef4444;">
+                    <i class="fa-solid fa-power-off"></i> Logout
+                </a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn-account" style="text-decoration:none;">Login</a>
+        {% endif %}
+    </nav>
+
+    <section class="hero-split" id="hero">
+        <div class="hero-text">
+            <div class="badge-new"><span>v2.0 LIVE</span> Multi-Factor Entropy Engine</div>
+            <h1>Academic Integrity,<br><span class="highlight">Verified by AI.</span></h1>
+            <p class="hero-sub">Don't let accidental plagiarism ruin your grade. Our dual-engine scans <strong>billions of web pages</strong> and detects AI-generated text using advanced math.</p>
+            
+            <form id="upload-form" class="upload-widget" method="POST" enctype="multipart/form-data">
+                <div class="drop-zone" id="drop-zone">
+                    <div class="icon-wrapper"><i class="fa-solid fa-file-arrow-up"></i></div>
+                    <div class="drop-text"><h3>Drop Report Here</h3><p>Supports .PDF, .DOCX, and .TXT</p></div>
+                    <input type="file" name="file" id="file-input" accept=".pdf,.docx,.txt" hidden>
+                </div>
+                
+                <div id="file-status" class="status-bar hidden">
+                    <div class="file-info"><i class="fa-solid fa-file-contract"></i><span id="filename">report.pdf</span></div>
+                    <button type="button" id="remove-file" class="btn-remove" title="Remove File"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <button type="submit" class="btn-primary"><i class="fa-solid fa-bolt"></i> Run Deep Scan</button>
+            </form>
+        </div>
+
+        <div class="hero-visual">
+            <div class="radar-container" id="radar-area">
+                <div class="radar-sweep"></div>
+                <div class="radar-circle c1"></div><div class="radar-circle c2"></div><div class="radar-circle c3"></div>
+            </div>
+            <div class="floating-card c-1"><span class="status-light"></span><i class="fa-brands fa-google"></i> Web Search Active</div>
+            <div class="floating-card c-2"><span class="status-light"></span><i class="fa-solid fa-robot"></i> AI Detection On</div>
+        </div>
+    </section>
+
+    <div class="stats-ribbon-container">
+        <div class="live-stats-ribbon">
+            <div class="stat-item">
+                <i class="fa-solid fa-crosshairs"></i>
+                <div class="stat-info">
+                    <div class="num-row">
+                        <span class="stat-num" data-target="98.7">0</span><span class="symbol">%</span>
+                    </div>
+                    <span class="stat-label">Real-Time Accuracy</span>
+                </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <i class="fa-solid fa-file-shield"></i>
+                <div class="stat-info">
+                    <div class="num-row">
+                        <span class="stat-num" data-target="14205">0</span><span class="symbol">+</span>
+                    </div>
+                    <span class="stat-label">Documents Secured</span>
+                </div>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <i class="fa-solid fa-bolt-lightning" style="color: var(--warning);"></i>
+                <div class="stat-info">
+                    <div class="num-row">
+                        <span class="stat-num" data-target="0.8">0</span><span class="symbol">s</span>
+                    </div>
+                    <span class="stat-label">Avg. Latency</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="features-section" id="features">
+        <div class="section-header"><h2>Under the Hood</h2><p>Our multi-layered architecture combines vector math, neural networks, and forensic analysis.</p></div>
+        <div class="bento-grid">
+            <div class="bento-card large"><div class="card-icon green"><i class="fa-solid fa-network-wired"></i></div><h3>Neural NLP Engine</h3><p>Unlike old checkers, our AI understands context.</p></div>
+            <div class="bento-card"><div class="card-icon orange"><i class="fa-solid fa-fingerprint"></i></div><h3>AI-Writing Detection</h3><p>Flags content generated by ChatGPT, Gemini, or Claude.</p></div>
+            <div class="bento-card"><div class="card-icon blue"><i class="fa-solid fa-code-compare"></i></div><h3>Code Similarity</h3><p>Checks assignments for copied logic structure.</p></div>
+            <div class="bento-card wide"><div class="card-content"><h3>Deep Web Scraping</h3><p>Real-time Google Search API integration.</p></div><i class="fa-solid fa-globe bg-icon"></i></div>
+            <div class="bento-card medium"><div class="card-icon purple"><i class="fa-solid fa-wand-magic-sparkles"></i></div><h3>Anti-Cheat & Obfuscation</h3><p>Detects hidden "white text" and zero-width characters.</p></div>
+            <div class="bento-card"><div class="card-icon red"><i class="fa-solid fa-file-image"></i></div><h3>OCR Image Scan</h3><p>Extracts text from screenshots embedded in PDFs.</p></div>
+        </div>
+    </section>
+
+    <footer><div class="footer-content"><div class="brand">Plagiarism<strong>Guard</strong></div><p>Final Year Project 2026 | Dept of Information Technology</p></div></footer>
+
+    <div id="loader-overlay" class="loader-wrap">
+        <div class="spinner"></div>
+        <h3 id="loading-text" class="loading-text">Initializing System...</h3>
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar-fill"></div>
+        </div>
+    </div>    
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

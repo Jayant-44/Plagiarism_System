@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 2cm;
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 1cm; margin-left: 2cm; margin-right: 2cm; height: 1cm;
+            }
+        }
+        body { font-family: Helvetica, sans-serif; font-size: 12px; color: #333; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1e3a8a; padding-bottom: 10px; }
+        .college-title { font-size: 18px; font-weight: bold; color: #1e3a8a; }
+        .report-title { font-size: 24px; font-weight: bold; color: #111; margin-top: 10px; }
+        
+        .summary-box { border: 1px solid #ccc; background-color: #f9fafb; padding: 15px; margin-bottom: 20px; }
+        .summary-table { width: 100%; }
+        .summary-table td { padding: 5px; }
+        
+        .score-row { width: 100%; margin-bottom: 30px; }
+        .score-card { width: 45%; display: inline-block; padding: 15px; border-radius: 5px; text-align: center; }
+        .plag-card { border-top: 5px solid #ef4444; background-color: #fef2f2; }
+        .ai-card { border-top: 5px solid #a855f7; background-color: #faf5ff; }
+        .score-number { font-size: 28px; font-weight: bold; }
+        
+        .document-text { line-height: 1.8; text-align: justify; margin-top: 20px; }
+        .hl-ai { color: #8b5cf6; font-weight: bold; }
+        .hl-plag { color: #d97706; font-weight: bold; }
+        .hl-spun { color: #2563eb; font-weight: bold; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="college-title">PANIPAT INSTITUTE OF ENGINEERING & TECHNOLOGY</div>
+        <div class="report-title">Official PlagiarismGuard Integrity Report</div>
+    </div>
+
+    <div class="summary-box">
+        <table class="summary-table">
+            <tr>
+                <td><strong>Document Name:</strong></td><td>{{ scan_result.filename }}</td>
+                <td><strong>Scan Date:</strong></td><td>{{ time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            </tr>
+            <tr>
+                <td><strong>Word Count:</strong></td><td>{{ scan_result.word_count }}</td>
+                <td><strong>Report ID:</strong></td><td>PG-{{ time.time() | int }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="score-row">
+        <div class="score-card plag-card">
+            <div style="color: #ef4444; font-weight: bold; margin-bottom: 5px;">DATABASE MATCH</div>
+            <div class="score-number" style="color: #ef4444;">{{ scan_result.plag_score }}%</div>
+        </div>
+        <div style="width: 5%; display: inline-block;"></div>
+        <div class="score-card ai-card">
+            <div style="color: #a855f7; font-weight: bold; margin-bottom: 5px;">AI / SPUN PROBABILITY</div>
+            <div class="score-number" style="color: #a855f7;">{{ scan_result.ai_score }}%</div>
+            <div style="font-size: 10px; margin-top: 5px;">{{ scan_result.ai_label }}</div>
+        </div>
+    </div>
+
+    <h3>Sources Found</h3>
+    <ul style="font-size: 11px; color: #555; margin-bottom: 30px;">
+        {% for filename, score in scan_result.web_matches %}
+            <li>{{ score }}% Match - {{ filename }}</li>
+        {% else %}
+            <li>No matches found.</li>
+        {% endfor %}
+    </ul>
+
+    <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 5px;">Annotated Document</h3>
+    <div style="font-size: 10px; margin-bottom: 15px;">
+        <span class="hl-ai">■ AI Generated</span> | 
+        <span class="hl-plag">■ Plagiarized</span> | 
+        <span class="hl-spun">■ Paraphrased (Spinbot)</span>
+    </div>
+
+    <div class="document-text">
+        {% for item in scan_result.pdf_data %}
+            {% if item.type == 'ai' %}
+                <span class="hl-ai">{{ item.text }}</span>
+            {% elif item.type == 'plag' %}
+                <span class="hl-plag">{{ item.text }}</span>
+            {% elif item.type == 'spun' %}
+                <span class="hl-spun">{{ item.text }}</span>
+            {% else %}
+                <span>{{ item.text }}</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div id="footerContent" style="text-align: center; color: #888; font-size: 9px;">
+        PlagiarismGuard System - Generated for PIET Final Year Project - Page <pdf:pagenumber>
+    </div>
+
+</body>
+</html>

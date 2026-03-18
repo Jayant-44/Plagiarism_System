@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagiarismGuard | Scan Report</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="cyber-grid"></div>
+
+    <nav class="floating-nav">
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved"></i> PLAG<strong>GUARD</strong>
+        </div>
+        <div style="color: var(--text-muted); font-size: 0.9rem;">
+            <i class="fa-solid fa-file-contract"></i> REPORT
+        </div>
+    </nav>
+
+    <div class="report-container" style="max-width: 1000px; margin: 0 auto; padding-top: 100px; padding-bottom: 50px;">
+        
+        <h1 style="margin-bottom: 10px; text-align: center;">Scan Results</h1>
+        <p style="color: var(--text-muted); margin-bottom: 40px; text-align: center;">{{ scan_result.filename }}</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+            <div class="bento-card" style="text-align: center; background-color: #1a1d24; padding: 30px; border-radius: 12px; border: 1px solid #2d3748;">
+                <h3 style="color: #3b82f6; margin-bottom: 20px;">Highest Database Match</h3>
+                
+                <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
+                    <svg width="150" height="150" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                        <circle cx="75" cy="75" r="65" fill="none" stroke="#2d3748" stroke-width="12"></circle>
+                        <circle cx="75" cy="75" r="65" fill="none" 
+                                stroke="{% if scan_result.plag_score > 20 %}#ef4444{% else %}#10b981{% endif %}" 
+                                stroke-width="12" stroke-dasharray="408" 
+                                stroke-dashoffset="{{ 408 - (4.08 * scan_result.plag_score) }}" stroke-linecap="round"></circle>
+                    </svg>
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: white;">
+                        {{ scan_result.plag_score }}%
+                    </div>
+                </div>
+
+                {% if scan_result.plag_score > 20 %}
+                    <p style="font-weight: bold; color: #ef4444; letter-spacing: 1px; margin-top: 20px;">SIGNIFICANT MATCHES</p>
+                {% else %}
+                    <p style="font-weight: bold; color: #10b981; letter-spacing: 1px; margin-top: 20px;">ORIGINAL CONTENT</p>
+                {% endif %}
+            </div>
+
+            <div class="bento-card" style="text-align: center; background-color: #1a1d24; padding: 30px; border-radius: 12px; border: 1px solid #2d3748;">
+                <h3 style="color: #10b981; margin-bottom: 20px;">AI / Spinbot Probability</h3>
+                
+                <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
+                    <svg width="150" height="150" style="position: absolute; top: 0; left: 0; transform: rotate(-90deg);">
+                        <circle cx="75" cy="75" r="65" fill="none" stroke="#2d3748" stroke-width="12"></circle>
+                        <circle cx="75" cy="75" r="65" fill="none" 
+                                stroke="{% if scan_result.ai_score > 50 %}#ef4444{% elif scan_result.ai_score > 30 %}#f59e0b{% else %}#10b981{% endif %}" 
+                                stroke-width="12" stroke-dasharray="408" 
+                                stroke-dashoffset="{{ 408 - (4.08 * scan_result.ai_score) }}" stroke-linecap="round"></circle>
+                    </svg>
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold; color: white;">
+                        {{ scan_result.ai_score }}%
+                    </div>
+                </div>
+
+                {% if scan_result.ai_score > 50 %}
+                    <p style="font-weight: bold; color: #ef4444; letter-spacing: 1px; margin-top: 20px;">{{ scan_result.ai_label|upper }}</p>
+                {% elif scan_result.ai_score > 30 %}
+                    <p style="font-weight: bold; color: #f59e0b; letter-spacing: 1px; margin-top: 20px;">{{ scan_result.ai_label|upper }}</p>
+                {% else %}
+                    <p style="font-weight: bold; color: #10b981; letter-spacing: 1px; margin-top: 20px;">{{ scan_result.ai_label|upper }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; margin-bottom: 40px;">
+            
+            <div style="background-color: #1a1d24; padding: 30px; border-radius: 12px; border: 1px solid #2d3748;">
+                <h4 style="margin-bottom: 15px; border-bottom: 1px solid #2d3748; padding-bottom: 10px; color: white;"><i class="fa-solid fa-database"></i> Source Analysis</h4>
+                <div style="color: var(--text-main); line-height: 1.6; font-size: 1rem;">
+                    <p style="margin-bottom: 20px;">
+                        <strong>Lexical Detection:</strong> {{ scan_result.ai_label }} ({{ scan_result.ai_score }}% Confidence)
+                    </p>
+                    <strong>Identified Sources:</strong>
+                    {% if scan_result.web_matches %}
+                        <ul style="list-style: none; margin-top: 10px; padding-left: 0;">
+                            {% for filename, score in scan_result.web_matches %}
+                            <li style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="color: #ef4444; font-weight: bold; margin-right: 10px;">{{ score }}% Match</span>
+                                <span style="color: #9ca3af;">Found in: {{ filename }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p style="color: #6b7280; margin-top: 5px;">No external matches found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="background-color: #1a1d24; padding: 30px; border-radius: 12px; border: 1px solid #2d3748; display: flex; flex-direction: column; align-items: center;">
+                <h4 style="margin-bottom: 15px; width: 100%; border-bottom: 1px solid #2d3748; padding-bottom: 10px; color: white;"><i class="fa-solid fa-chart-pie"></i> Document Composition</h4>
+                <div style="width: 220px; height: 220px; margin-top: 10px; position: relative;">
+                    <canvas id="compositionChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 50px;">
+            <a href="{{ url_for('index') }}" class="back-btn" style="padding: 10px 20px; background-color: #2d3748; color: white; border-radius: 8px; text-decoration: none;">
+                <i class="fa-solid fa-arrow-rotate-left"></i> New Scan
+            </a>
+            <a href="{{ url_for('download') }}" class="back-btn" style="padding: 10px 20px; border: 1px solid #10b981; color: #10b981; border-radius: 8px; text-decoration: none;">
+                <i class="fa-solid fa-download"></i> Download
+            </a>
+            <button onclick="window.print()" class="back-btn" style="padding: 10px 20px; border: 1px solid #3b82f6; color: #3b82f6; background: transparent; border-radius: 8px; cursor:pointer;">
+                <i class="fa-solid fa-print"></i> Print
+            </button>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 40px;">
+            <h3 style="color: white; font-family: 'Space Grotesk', sans-serif; margin-bottom: 15px; font-size: 22px; text-align: center;">Annotated Document</h3>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; font-size: 14px; color: #9ca3af; margin-bottom: 25px; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 8px;"><div style="height: 12px; width: 12px; border-radius: 50%; background-color: #a855f7;"></div> AI Generated</div>
+                <div style="display: flex; align-items: center; gap: 8px;"><div style="height: 12px; width: 12px; border-radius: 50%; background-color: #f59e0b;"></div> Plagiarized Match</div>
+                <div style="display: flex; align-items: center; gap: 8px;"><div style="height: 12px; width: 12px; border-radius: 50%; background-color: #3b82f6;"></div> Paraphrased / Spinbot</div>
+            </div>
+
+            <div style="background-color: #1a1d24; border: 1px solid #2d3748; border-radius: 12px; padding: 50px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px; line-height: 2.0; color: #e5e7eb; text-align: justify; overflow-wrap: break-word;">
+                {{ scan_result.highlighted_text | safe }}
+            </div>
+        </div>
+
+    </div>
+
+    {% set ai_count = scan_result.pdf_data | selectattr('type', 'equalto', 'ai') | list | length %}
+    {% set plag_count = scan_result.pdf_data | selectattr('type', 'equalto', 'plag') | list | length %}
+    {% set spun_count = scan_result.pdf_data | selectattr('type', 'equalto', 'spun') | list | length %}
+    {% set clean_count = scan_result.pdf_data | selectattr('type', 'equalto', 'clean') | list | length %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('compositionChart').getContext('2d');
+            
+            // Injecting the exact sentence counts from Python/Jinja
+            const dataCounts = [{{ clean_count }}, {{ ai_count }}, {{ plag_count }}, {{ spun_count }}];
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Original', 'AI Generated', 'Plagiarized', 'Paraphrased'],
+                    datasets: [{
+                        data: dataCounts,
+                        backgroundColor: [
+                            '#10b981', // Green (Clean)
+                            '#a855f7', // Purple (AI)
+                            '#f59e0b', // Orange (Plag)
+                            '#3b82f6'  // Blue (Spun)
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': ' + context.raw + ' sentences';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlagiarismGuard | Scan History</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="cyber-grid"></div>
+
+    <nav class="floating-nav">
+        <div class="logo"><i class="fa-solid fa-shield-halved"></i> PLAG<strong>GUARD</strong></div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('index') }}">Scan</a></li>
+            <li><a href="{{ url_for('history') }}" style="color: var(--primary);">History</a></li>
+        </ul>
+    </nav>
+
+    <div class="report-container" style="max-width: 900px;">
+        <h1 style="margin-bottom: 30px;">Scan History</h1>
+        
+        <table class="history-table" style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #2d3748;">
+                    <th style="padding: 15px;">Document Name</th>
+                    <th style="padding: 15px;">Date</th>
+                    <th style="padding: 15px;">Database Match</th>
+                    <th style="padding: 15px;">AI Probability</th>
+                    <th style="padding: 15px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for scan in scans %}
+                <tr style="border-bottom: 1px solid #2d3748;">
+                    <td style="padding: 15px;"><i class="fa-regular fa-file-pdf" style="color: #ef4444; margin-right: 8px;"></i> {{ scan['filename'] }}</td>
+                    <td style="padding: 15px; color: #9ca3af;">{{ scan['date'][:16] }}</td>
+                    
+                    <td style="padding: 15px; font-weight: bold; color: {% if scan['plag_score'] > 20 %}#ef4444{% else %}#10b981{% endif %};">
+                        {{ scan['plag_score'] }}%
+                    </td>
+                    
+                    <td style="padding: 15px; font-weight: bold; color: {% if scan['ai_score'] > 50 %}#a855f7{% elif scan['ai_score'] > 30 %}#f59e0b{% else %}#10b981{% endif %};">
+                        {{ scan['ai_score'] }}%
+                    </td>
+
+                    <td style="padding: 15px;">
+    {% if scan['plag_score'] > 20 or scan['ai_score'] > 50 %}
+        <span style="display: inline-block; white-space: nowrap; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;">High Risk</span>
+    {% elif scan['ai_score'] > 30 %}
+        <span style="display: inline-block; white-space: nowrap; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.5); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;">Review Needed</span>
+    {% else %}
+        <span style="display: inline-block; white-space: nowrap; background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.5); padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold;">Clean</span>
+    {% endif %}
+</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align:center; padding: 30px; color: var(--text-muted);">No scans found yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="text-align: center;">
+            <a href="{{ url_for('index') }}" class="back-btn" style="margin-top: 30px; display: inline-block;">
+                <i class="fa-solid fa-arrow-left"></i> Back to Scanner
+            </a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
